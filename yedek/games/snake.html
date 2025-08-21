@@ -1,0 +1,42 @@
+
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake</title><style>
+html,body{background:#0f172a;color:#e2e8f0;margin:0;height:100%;display:grid;place-items:center;font:16px/1.4 system-ui}
+.wrap{display:grid;gap:8px;place-items:center}
+canvas{background:#020617;border:2px solid #334155;border-radius:10px;image-rendering: pixelated;}
+.info{opacity:.8}
+</style></head><body>
+<div class="wrap">
+  <canvas id="c" width="400" height="400"></canvas>
+  <div class="info">Ok tuşları ile oyna — Kendine çarpma!</div>
+</div>
+<script>
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const grid = 20;
+let vx=1, vy=0, snake=[{x:10,y:10}], food=randFood(), speed=120, last=0, over=false;
+function randFood(){ return {x: Math.floor(Math.random()* (c.width/grid)), y: Math.floor(Math.random()* (c.height/grid))}; }
+function drawCell(x,y,color){ ctx.fillStyle=color; ctx.fillRect(x*grid, y*grid, grid-2, grid-2); }
+function loop(t){
+  if(over){ ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='20px system-ui'; ctx.fillText('Oyun Bitti - R için yeniden', c.width/2, c.height/2); return; }
+  if(t-last > speed){
+    last=t;
+    const head={x:(snake[0].x+vx+ c.width/grid)%(c.width/grid), y:(snake[0].y+vy+ c.height/grid)%(c.height/grid)};
+    if(snake.some(p=>p.x===head.x && p.y===head.y)) over=true;
+    snake.unshift(head);
+    if(head.x===food.x && head.y===food.y){ food=randFood(); speed=Math.max(60,speed-2); }
+    else snake.pop();
+  }
+  ctx.clearRect(0,0,c.width,c.height);
+  drawCell(food.x,food.y,'#22c55e');
+  snake.forEach((p,i)=> drawCell(p.x,p.y, i? '#60a5fa' : '#3b82f6'));
+  requestAnimationFrame(loop);
+}
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowUp' && vy!==1){vx=0;vy=-1}
+  if(e.key==='ArrowDown' && vy!==-1){vx=0;vy=1}
+  if(e.key==='ArrowLeft' && vx!==1){vx=-1;vy=0}
+  if(e.key==='ArrowRight' && vx!==-1){vx=1;vy=0}
+  if(e.key.toLowerCase()==='r'){ over=false; snake=[{x:10,y:10}]; vx=1;vy=0; speed=120; food=randFood(); requestAnimationFrame(loop);}
+});
+requestAnimationFrame(loop);
+</script></body></html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Pong Oyunu</title>
+  <style>
+    body { margin:0; display:flex; justify-content:center; align-items:center; background:#111; color:white; }
+    canvas { background:#222; display:block; }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    let paddleHeight = 80, paddleWidth = 10;
+    let playerY = canvas.height/2 - paddleHeight/2;
+    let aiY = canvas.height/2 - paddleHeight/2;
+    let ballX = canvas.width/2, ballY = canvas.height/2;
+    let ballSize = 10;
+    let ballSpeedX = 4, ballSpeedY = 4;
+    let playerScore = 0, aiScore = 0;
+
+    function drawRect(x,y,w,h,color){
+      ctx.fillStyle=color;
+      ctx.fillRect(x,y,w,h);
+    }
+
+    function drawCircle(x,y,r,color){
+      ctx.fillStyle=color;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawText(text,x,y,color){
+      ctx.fillStyle=color;
+      ctx.font="20px Arial";
+      ctx.fillText(text,x,y);
+    }
+
+    function resetBall(){
+      ballX = canvas.width/2;
+      ballY = canvas.height/2;
+      ballSpeedX = -ballSpeedX;
+    }
+
+    function game(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // top hareket
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      // üst-alt çarpma
+      if(ballY+ballSize>canvas.height || ballY-ballSize<0) ballSpeedY=-ballSpeedY;
+
+      // player hareket
+      drawRect(0,playerY,paddleWidth,paddleHeight,"lime");
+      drawRect(canvas.width-paddleWidth,aiY,paddleWidth,paddleHeight,"red");
+      drawCircle(ballX,ballY,ballSize,"white");
+
+      // çarpışma kontrol
+      if(ballX-ballSize<0){
+        if(ballY>playerY && ballY<playerY+paddleHeight){
+          ballSpeedX=-ballSpeedX;
+        } else {
+          aiScore++;
+          resetBall();
+        }
+      }
+      if(ballX+ballSize>canvas.width){
+        if(ballY>aiY && ballY<aiY+paddleHeight){
+          ballSpeedX=-ballSpeedX;
+        } else {
+          playerScore++;
+          resetBall();
+        }
+      }
+
+      // AI hareket
+      aiY += ((ballY - (aiY+paddleHeight/2)))*0.05;
+
+      // skor
+      drawText(playerScore,canvas.width/4,30,"lime");
+      drawText(aiScore,3*canvas.width/4,30,"red");
+    }
+
+    function update(){
+      game();
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener("keydown",e=>{
+      if(e.key==="ArrowUp") playerY -= 20;
+      if(e.key==="ArrowDown") playerY += 20;
+    });
+
+    update();
+  </script>
+</body>
+</html>

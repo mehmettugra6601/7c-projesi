@@ -1,0 +1,77 @@
+
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini Tetris</title><style>
+html,body{background:#0f172a;color:#e2e8f0;margin:0;height:100%;display:grid;place-items:center;font:16px/1.4 system-ui}
+#wrap{display:grid;gap:8px;place-items:center}
+canvas{background:#020617;border:2px solid #334155;border-radius:10px;image-rendering: pixelated;}
+</style></head><body>
+<div id="wrap">
+<canvas id="c" width="200" height="400"></canvas>
+<div>Ok tuşları: Hareket/Döndür, Aşağı hızlı indir. R: Yeniden</div>
+</div>
+<script>
+const ctx=c.getContext('2d'); const COLS=10, ROWS=20, SIZE=20;
+const SHAPES={
+ I:[[1,1,1,1]],
+ O:[[1,1],[1,1]],
+ T:[[0,1,0],[1,1,1]],
+ L:[[1,0,0],[1,1,1]],
+ J:[[0,0,1],[1,1,1]],
+ S:[[0,1,1],[1,1,0]],
+ Z:[[1,1,0],[0,1,1]]
+};
+const COLORS={I:'#22d3ee',O:'#fbbf24',T:'#a78bfa',L:'#fb923c',J:'#60a5fa',S:'#34d399',Z:'#ef4444'};
+let grid=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+let cur=newPiece(), over=false, drop=0, speed=500;
+function newPiece(){
+  const keys=Object.keys(SHAPES); const k=keys[Math.floor(Math.random()*keys.length)];
+  return {m:SHAPES[k].map(r=>r.slice()), x:3,y:0, k};
+}
+function rotate(m){ return m[0].map((_,i)=>m.map(r=>r[i]).reverse()); }
+function collide(m,x,y){
+  for(let r=0;r<m.length;r++) for(let c=0;c<m[r].length;c++){
+    if(m[r][c] && (x+c<0||x+c>=COLS||y+r>=ROWS || (y+r>=0 && grid[y+r][x+c])) ) return true;
+  }
+  return false;
+}
+function merge(){
+  cur.m.forEach((r,i)=> r.forEach((v,j)=>{ if(v && cur.y+i>=0) grid[cur.y+i][cur.x+j]={k:cur.k}; }));
+}
+function clearLines(){
+  let cleared=0;
+  grid=grid.filter(row=> row.some(v=>!v) );
+  cleared = ROWS - grid.length;
+  while(grid.length<ROWS) grid.unshift(Array(COLS).fill(0));
+  if(cleared) speed = Math.max(120, speed-20*cleared);
+}
+function draw(){
+  ctx.clearRect(0,0,200,400);
+  // board
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    if(grid[y][x]){ ctx.fillStyle=COLORS[grid[y][x].k]; ctx.fillRect(x*SIZE,y*SIZE,SIZE-1,SIZE-1); }
+  }
+  // piece
+  cur.m.forEach((r,i)=> r.forEach((v,j)=>{ if(v){ ctx.fillStyle=COLORS[cur.k]; ctx.fillRect((cur.x+j)*SIZE,(cur.y+i)*SIZE,SIZE-1,SIZE-1);} }));
+  requestAnimationFrame(update);
+}
+function update(ts){
+  if(over) { ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(0,0,200,400); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='16px system-ui'; ctx.fillText('Oyun Bitti - R', 100, 200); return; }
+  if(!drop) drop=ts;
+  if(ts-drop>speed){
+    drop=ts; cur.y++;
+    if(collide(cur.m,cur.x,cur.y)){
+      cur.y--; merge(); clearLines(); cur=newPiece();
+      if(collide(cur.m,cur.x,cur.y)){ over=true; }
+    }
+  }
+  draw();
+}
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft' && !collide(cur.m,cur.x-1,cur.y)) cur.x--;
+  if(e.key==='ArrowRight' && !collide(cur.m,cur.x+1,cur.y)) cur.x++;
+  if(e.key==='ArrowDown' && !collide(cur.m,cur.x,cur.y+1)) cur.y++;
+  if(e.key==='ArrowUp'){ const r=rotate(cur.m); if(!collide(r,cur.x,cur.y)) cur.m=r; }
+  if(e.key.toLowerCase()==='r'){ grid=Array.from({length:ROWS},()=>Array(COLS).fill(0)); cur=newPiece(); over=false; speed=500; requestAnimationFrame(update); }
+});
+requestAnimationFrame(update);
+</script></body></html>

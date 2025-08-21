@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>7C PROJESİ – Mini Oyunlar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="MEB engeline takılmadan, Cloudflare altyapısıyla hızlı ve güvenli mini HTML5 oyunlar.">
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <div class="logo">
+      <i class="fas fa-gamepad"></i><span>7C PROJESİ</span>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#"><i class="fas fa-home"></i> Ana Sayfa</a></li>
+        <li><a href="#"><i class="fas fa-fire"></i> Popüler</a></li>
+        <li><a href="#"><i class="fas fa-star"></i> Favoriler</a></li>
+      </ul>
+    </nav>
+    <div class="header-controls">
+      <div class="search-container">
+        <input id="searchInput" type="text" placeholder="Oyun ara...">
+        <button id="searchBtn"><i class="fas fa-search"></i></button>
+      </div>
+      <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <h1>Basit ama bağımlılık yapan HTML5 mini oyunlar</h1>
+    <p>poki/crazygames tarzı hızlı açılan kartlar, tek tıkla oynama. Hepsi <strong>yerel</strong> ve <strong>reklamsız</strong>.</p>
+    <a class="btn" href="#games"><i class="fas fa-bolt"></i> Hemen Oyna</a>
+  </section>
+
+  <div class="platform-indicators">
+    <div class="platform"><i class="fab fa-windows"></i>Windows</div>
+    <div class="platform"><i class="fab fa-linux"></i>Linux</div>
+    <div class="platform"><i class="fas fa-desktop"></i>Pardus</div>
+    <div class="platform"><i class="fas fa-mobile-alt"></i>Mobil</div>
+    <div class="platform"><i class="fas fa-chalkboard"></i>Akıllı Tahta</div>
+  </div>
+
+  <div class="warning"><i class="fas fa-exclamation-triangle"></i> Bu site eğitim amaçlıdır. Okul zamanı oyun oynamak ders başarınızı etkileyebilir.</div>
+
+  <div class="section-title"><i class="fas fa-layer-group"></i> Oyun Kategorileri</div>
+  <div class="categories">
+    <div class="category active" data-category="all">Tümü</div>
+    <div class="category" data-category="arcade">Arcade</div>
+    <div class="category" data-category="puzzle">Bulmaca</div>
+    <div class="category" data-category="skill">Refleks</div>
+  </div>
+
+  <div id="games" class="section-title"><i class="fas fa-fire"></i> Popüler Oyunlar</div>
+  <div class="games-grid">
+
+    <div class="game-card" data-category="arcade" data-game="snake">
+      <div class="thumb">
+        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop" alt="Snake">
+        <span class="badge">Klasik</span>
+        <button class="fav-btn" data-game="snake" onclick="toggleFavorite('snake')"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="title">Yılan</div>
+        <div class="desc">Yemleri topla, büyü ve rekoru kır.</div>
+        <div class="meta">
+          <div class="rating">
+            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+          </div>
+          <div>
+            <button class="play-btn" data-game="snake"><i class="fas fa-play"></i> Oyna</button>
+          </div>
+        </div>
+        <div class="rate">
+          <small>Puanla: </small>
+          <a href="#" onclick="rateGame('snake',1)">★</a>
+          <a href="#" onclick="rateGame('snake',2)">★</a>
+          <a href="#" onclick="rateGame('snake',3)">★</a>
+          <a href="#" onclick="rateGame('snake',4)">★</a>
+          <a href="#" onclick="rateGame('snake',5)">★</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-card" data-category="arcade" data-game="pong">
+      <div class="thumb">
+        <img src="https://images.unsplash.com/photo-1511735111819-9a3f7709049c?q=80&w=800&auto=format&fit=crop" alt="Pong">
+        <span class="badge">Retro</span>
+        <button class="fav-btn" data-game="pong" onclick="toggleFavorite('pong')"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="title">Pong</div>
+        <div class="desc">W/S ile raketini hareket ettir ve savun.</div>
+        <div class="meta">
+          <div class="rating">
+            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+          </div>
+          <div><button class="play-btn" data-game="pong"><i class="fas fa-play"></i> Oyna</button></div>
+        </div>
+        <div class="rate"><small>Puanla: </small><a href="#" onclick="rateGame('pong',1)">★</a><a href="#" onclick="rateGame('pong',2)">★</a><a href="#" onclick="rateGame('pong',3)">★</a><a href="#" onclick="rateGame('pong',4)">★</a><a href="#" onclick="rateGame('pong',5)">★</a></div>
+      </div>
+    </div>
+
+    <div class="game-card" data-category="puzzle" data-game="tetris">
+      <div class="thumb">
+        <img src="https://images.unsplash.com/photo-1611996575749-79a3a250f948?q=80&w=800&auto=format&fit=crop" alt="Tetris">
+        <span class="badge">Bulmaca</span>
+        <button class="fav-btn" data-game="tetris" onclick="toggleFavorite('tetris')"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="title">Mini Tetris</div>
+        <div class="desc">Düşen blokları yerleştir, satırları temizle.</div>
+        <div class="meta">
+          <div class="rating">
+            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+          </div>
+          <div><button class="play-btn" data-game="tetris"><i class="fas fa-play"></i> Oyna</button></div>
+        </div>
+        <div class="rate"><small>Puanla: </small><a href="#" onclick="rateGame('tetris',1)">★</a><a href="#" onclick="rateGame('tetris',2)">★</a><a href="#" onclick="rateGame('tetris',3)">★</a><a href="#" onclick="rateGame('tetris',4)">★</a><a href="#" onclick="rateGame('tetris',5)">★</a></div>
+      </div>
+    </div>
+
+    <div class="game-card" data-category="skill" data-game="flappy">
+      <div class="thumb">
+        <img src="https://images.unsplash.com/photo-1516054575922-2ce21c3b15c4?q=80&w=800&auto=format&fit=crop" alt="Flappy">
+        <span class="badge">Refleks</span>
+        <button class="fav-btn" data-game="flappy" onclick="toggleFavorite('flappy')"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="title">Flappy Kare</div>
+        <div class="desc">Zıpla ve engelleri aş; duvara çarpma.</div>
+        <div class="meta">
+          <div class="rating">
+            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+          </div>
+          <div><button class="play-btn" data-game="flappy"><i class="fas fa-play"></i> Oyna</button></div>
+        </div>
+        <div class="rate"><small>Puanla: </small><a href="#" onclick="rateGame('flappy',1)">★</a><a href="#" onclick="rateGame('flappy',2)">★</a><a href="#" onclick="rateGame('flappy',3)">★</a><a href="#" onclick="rateGame('flappy',4)">★</a><a href="#" onclick="rateGame('flappy',5)">★</a></div>
+      </div>
+    </div>
+
+    <div class="game-card" data-category="puzzle" data-game="memory">
+      <div class="thumb">
+        <img src="https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?q=80&w=800&auto=format&fit=crop" alt="Memory">
+        <span class="badge">Hafıza</span>
+        <button class="fav-btn" data-game="memory" onclick="toggleFavorite('memory')"><i class="far fa-heart"></i></button>
+      </div>
+      <div class="card-body">
+        <div class="title">Eş Kart Bul</div>
+        <div class="desc">Kartları çevir ve çiftlerini yakala.</div>
+        <div class="meta">
+          <div class="rating">
+            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+          </div>
+          <div><button class="play-btn" data-game="memory"><i class="fas fa-play"></i> Oyna</button></div>
+        </div>
+        <div class="rate"><small>Puanla: </small><a href="#" onclick="rateGame('memory',1)">★</a><a href="#" onclick="rateGame('memory',2)">★</a><a href="#" onclick="rateGame('memory',3)">★</a><a href="#" onclick="rateGame('memory',4)">★</a><a href="#" onclick="rateGame('memory',5)">★</a></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal" id="gameModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Yükleniyor…</h2>
+      <button class="close-modal" id="closeModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="game-container">
+      <iframe id="gameFrame" class="game-iframe" src="" allowfullscreen></iframe>
+    </div>
+    <div class="modal-header" style="justify-content:flex-start; gap:8px;">
+      <span id="gameDescription"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Dokunmatik kontroller -->
+<div class="touch-controls" id="touchControls">
+  <div class="control-group">
+    <div class="control-btn" id="leftBtn">←</div>
+    <div class="control-btn" id="rightBtn">→</div>
+  </div>
+  <div class="control-group">
+    <div class="control-btn" id="actionBtn">A</div>
+    <div class="control-btn" id="jumpBtn">Z</div>
+  </div>
+</div>
+
+<div class="touch-controls" id="directionControls">
+  <div class="control-group">
+    <div class="control-direction">
+      <div class="control-btn" style="visibility: hidden;"></div>
+      <div class="control-btn" id="upBtn">↑</div>
+      <div class="control-btn" style="visibility: hidden;"></div>
+      <div class="control-btn" id="leftDirBtn">←</div>
+      <div class="control-btn" id="centerBtn">○</div>
+      <div class="control-btn" id="rightDirBtn">→</div>
+      <div class="control-btn" style="visibility: hidden;"></div>
+      <div class="control-btn" id="downBtn">↓</div>
+      <div class="control-btn" style="visibility: hidden;"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <p>© 7C PROJESİ — Cloudflare ile hız ve gizlilik.</p>
+  </div>
+</footer>
+
+<script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake Oyunu</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      background: #222;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const grid = 20;
+    let count = 0;
+    let snake = [{x: 160, y: 160}];
+    let dx = grid;
+    let dy = 0;
+    let apple = {x: 320, y: 320};
+    let score = 0;
+
+    function getRandomPos() {
+      return Math.floor(Math.random() * 20) * grid;
+    }
+
+    function loop() {
+      requestAnimationFrame(loop);
+
+      if (++count < 6) return;
+      count = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // snake hareket
+      const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+      snake.unshift(head);
+
+      // yeme
+      if (head.x === apple.x && head.y === apple.y) {
+        score++;
+        apple.x = getRandomPos();
+        apple.y = getRandomPos();
+      } else {
+        snake.pop();
+      }
+
+      // çarpma kontrol
+      if (
+        head.x < 0 || head.x >= canvas.width ||
+        head.y < 0 || head.y >= canvas.height ||
+        snake.slice(1).some(s => s.x === head.x && s.y === head.y)
+      ) {
+        alert("Oyun Bitti! Skor: " + score);
+        document.location.reload();
+      }
+
+      // elma çiz
+      ctx.fillStyle = "red";
+      ctx.fillRect(apple.x, apple.y, grid - 2, grid - 2);
+
+      // yılan çiz
+      ctx.fillStyle = "lime";
+      snake.forEach((s, i) => {
+        ctx.fillRect(s.x, s.y, grid - 2, grid - 2);
+      });
+
+      // skor
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.fillText("Skor: " + score, 10, 20);
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" && dx === 0) { dx = -grid; dy = 0; }
+      if (e.key === "ArrowUp" && dy === 0) { dy = -grid; dx = 0; }
+      if (e.key === "ArrowRight" && dx === 0) { dx = grid; dy = 0; }
+      if (e.key === "ArrowDown" && dy === 0) { dy = grid; dx = 0; }
+    });
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

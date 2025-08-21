@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Oyun Portalı</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🎮 Oyun Portalı</h1>
+    <input type="text" id="search" placeholder="Oyun Ara...">
+    <button id="themeToggle">🌙 / ☀️</button>
+  </header>
+
+  <nav class="categories">
+    <button class="category active" data-category="all">Tümü</button>
+    <button class="category" data-category="arcade">Arcade</button>
+    <button class="category" data-category="puzzle">Puzzle</button>
+  </nav>
+
+  <main class="game-list">
+
+    <!-- Snake -->
+    <div class="game-card" data-game="snake" data-category="arcade">
+      <h3 class="game-title">Snake</h3>
+      <button class="play-btn">Oyna</button>
+      <button class="fav-btn">❤️</button>
+      <div class="stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+    </div>
+
+    <!-- Pong -->
+    <div class="game-card" data-game="pong" data-category="arcade">
+      <h3 class="game-title">Pong</h3>
+      <button class="play-btn">Oyna</button>
+      <button class="fav-btn">❤️</button>
+      <div class="stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+    </div>
+
+    <!-- Tetris -->
+    <div class="game-card" data-game="tetris" data-category="arcade">
+      <h3 class="game-title">Tetris</h3>
+      <button class="play-btn">Oyna</button>
+      <button class="fav-btn">❤️</button>
+      <div class="stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+    </div>
+
+    <!-- Flappy -->
+    <div class="game-card" data-game="flappy" data-category="arcade">
+      <h3 class="game-title">Flappy Kare</h3>
+      <button class="play-btn">Oyna</button>
+      <button class="fav-btn">❤️</button>
+      <div class="stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+    </div>
+
+    <!-- Memory -->
+    <div class="game-card" data-game="memory" data-category="puzzle">
+      <h3 class="game-title">Hafıza Kartı</h3>
+      <button class="play-btn">Oyna</button>
+      <button class="fav-btn">❤️</button>
+      <div class="stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal -->
+  <div id="gameModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeModal" style="cursor:pointer;">X</span>
+      <h2 id="modalTitle"></h2>
+      <iframe id="gameFrame" src="" width="600" height="400"></iframe>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Oyun Portalı - Cloudflare Güvencesiyle</p>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>

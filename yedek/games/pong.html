@@ -1,0 +1,38 @@
+
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pong</title><style>
+html,body{background:#0f172a;color:#e2e8f0;margin:0;height:100%;display:grid;place-items:center;font:16px/1.4 system-ui}
+canvas{background:#020617;border:2px solid #334155;border-radius:10px}
+.info{opacity:.8;margin-top:8px}
+</style></head><body>
+<canvas id="c" width="640" height="400"></canvas>
+<div class="info">W/S ile hareket et — 7 puan alan kazanır</div>
+<script>
+const ctx=c.getContext('2d');let p1= {x:10,y:160,w:10,h:80,dy:0,score:0}, p2={x:620,y:160,w:10,h:80,dy:0,score:0};
+let ball={x:320,y:200,r:6,dx:3,dy:2}, over=false;
+function draw(){ ctx.clearRect(0,0,640,400); ctx.fillStyle='#1f2937'; for(let y=0;y<400;y+=20){ctx.fillRect(318,y,4,10);} 
+  ctx.fillStyle='#93c5fd'; ctx.fillRect(p1.x,p1.y,p1.w,p1.h); ctx.fillStyle='#fca5a5'; ctx.fillRect(p2.x,p2.y,p2.w,p2.h);
+  ctx.beginPath(); ctx.fillStyle='#eab308'; ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#e2e8f0'; ctx.font='20px system-ui'; ctx.fillText(p1.score, 280, 24); ctx.fillText(p2.score, 350, 24);
+}
+function step(){
+  if(over){ ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(0,0,640,400); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='20px system-ui'; ctx.fillText('Oyun Bitti - R ile yeniden', 320, 200); return; }
+  p1.y = Math.max(0, Math.min(320, p1.y + p1.dy));
+  // basit AI
+  p2.y += (ball.y - (p2.y+40))*0.08; p2.y = Math.max(0, Math.min(320, p2.y));
+  ball.x += ball.dx; ball.y += ball.dy;
+  if(ball.y<6||ball.y>394) ball.dy*=-1;
+  function collide(p){
+    return ball.x-ball.r<p.x+p.w && ball.x+ball.r>p.x && ball.y+ball.r>p.y && ball.y-ball.r<p.y+p.h;
+  }
+  if(collide(p1)){ ball.dx=Math.abs(ball.dx); ball.dx+=0.2; ball.dy += (ball.y-(p1.y+40))*0.05; }
+  if(collide(p2)){ ball.dx=-Math.abs(ball.dx); ball.dx-=0.2; ball.dy += (ball.y-(p2.y+40))*0.05; }
+  if(ball.x<0){ p2.score++; reset(); } if(ball.x>640){ p1.score++; reset(); }
+  if(p1.score===7||p2.score===7) over=true;
+  draw(); requestAnimationFrame(step);
+}
+function reset(){ ball.x=320; ball.y=200; ball.dx*=-1; ball.dy = (Math.random()>.5?1:-1)*(2+Math.random()*1.5); }
+addEventListener('keydown',e=>{ if(e.key==='w'||e.key==='W') p1.dy=-6; if(e.key==='s'||e.key==='S') p1.dy=6; if(e.key==='r'||e.key==='R'){ over=false; p1.score=p2.score=0; }});
+addEventListener('keyup',e=>{ if(e.key==='w'||e.key==='W'||e.key==='s'||e.key==='S') p1.dy=0; });
+draw(); requestAnimationFrame(step);
+</script></body></html>

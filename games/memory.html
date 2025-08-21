@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Hafıza Kartı Oyunu</title>
+  <style>
+    body { background:#111; color:white; display:flex; flex-direction:column; align-items:center; font-family:Arial; }
+    .grid { display:grid; grid-template-columns:repeat(4,80px); gap:10px; margin-top:20px; }
+    .card { width:80px; height:80px; background:#333; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; }
+    .matched { background:#2ecc71 !important; }
+  </style>
+</head>
+<body>
+  <h2>Hafıza Oyunu</h2>
+  <div class="grid" id="grid"></div>
+  <script>
+    const emojis=["🍎","🍌","🍇","🍉","🍒","🍋","🍎","🍌","🍇","🍉","🍒","🍋"];
+    let grid=document.getElementById("grid");
+    let cards=[],first=null,lock=false;
+
+    function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
+
+    function createBoard(){
+      shuffle(emojis).forEach(e=>{
+        let card=document.createElement("div");
+        card.className="card";
+        card.dataset.value=e;
+        card.addEventListener("click",flipCard);
+        grid.appendChild(card);
+      });
+    }
+
+    function flipCard(){
+      if(lock || this.classList.contains("matched") || this===first) return;
+      this.textContent=this.dataset.value;
+      if(!first){ first=this; }
+      else{
+        if(this.dataset.value===first.dataset.value){
+          this.classList.add("matched");
+          first.classList.add("matched");
+          first=null;
+        } else {
+          lock=true;
+          setTimeout(()=>{
+            this.textContent="";
+            first.textContent="";
+            first=null;
+            lock=false;
+          },800);
+        }
+      }
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
