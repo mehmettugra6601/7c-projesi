@@ -1,269 +1,249 @@
-// ======================
-// Oyun URL'leri
-// ======================
-const gameUrls = {
-    'snake': 'games/snake.html',
-    'pong': 'games/pong.html',
-    'tetris': 'games/tetris.html',
-    'flappy': 'games/flappy.html',
-    'memory': 'games/memory.html'
-};
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Oyunu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #0a0a2a;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            border: 2px solid #fff;
+            background: #000;
+        }
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+        }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 30px;
+            text-align: center;
+            display: none;
+        }
+        .restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="score">Skor: <span id="score">0</span></div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="game-over" id="gameOver">
+        Oyun Bitti!<br>
+        <span id="finalScore">0</span> puan<br>
+        <button class="restart" onclick="restartGame()">Yeniden Başlat</button>
+    </div>
 
-// ======================
-// DOM Elemanları
-// ======================
-const searchInput = document.getElementById('searchInput'); // ID düzeltildi
-const searchBtn = document.getElementById('searchBtn'); // Arama butonu eklendi
-const categoryButtons = document.querySelectorAll('.category');
-const gameCards = document.querySelectorAll('.game-card');
-const modal = document.getElementById('gameModal');
-const modalTitle = document.getElementById('modalTitle');
-const gameFrame = document.getElementById('gameFrame');
-const gameDescription = document.getElementById('gameDescription'); // Açıklama için eklendi
-const closeModalBtn = document.getElementById('closeModal');
-const themeToggle = document.getElementById('themeToggle');
-
-// ======================
-// LocalStorage Yardımcıları
-// ======================
-function getFavorites() {
-    return JSON.parse(localStorage.getItem('favorites') || '[]');
-}
-
-function saveFavorites(favs) {
-    localStorage.setItem('favorites', JSON.stringify(favs));
-}
-
-function getRatings() {
-    return JSON.parse(localStorage.getItem('ratings') || '{}');
-}
-
-function saveRatings(ratings) {
-    localStorage.setItem('ratings', JSON.stringify(ratings));
-}
-
-// ======================
-// Favori İşlemleri
-// ======================
-function toggleFavorite(gameId) {
-    let favs = getFavorites();
-    const favBtn = document.querySelector(`.fav-btn[data-game="${gameId}"]`);
-    
-    if (favs.includes(gameId)) {
-        favs = favs.filter(f => f !== gameId);
-        favBtn.classList.remove('active');
-        favBtn.innerHTML = '<i class="far fa-heart"></i>';
-    } else {
-        favs.push(gameId);
-        favBtn.classList.add('active');
-        favBtn.innerHTML = '<i class="fas fa-heart"></i>';
-    }
-    saveFavorites(favs);
-}
-
-// ======================
-// Oyun Puanlama
-// ======================
-function rateGame(gameId, rating) {
-    event.preventDefault();
-    const ratings = getRatings();
-    ratings[gameId] = rating;
-    saveRatings(ratings);
-    updateRatings();
-}
-
-// ======================
-// Oyun Kartlarını Hazırla
-// ======================
-function setupGameCards() {
-    const favorites = getFavorites();
-    const ratings = getRatings();
-
-    gameCards.forEach(card => {
-        const gameId = card.dataset.game;
-
-        // Favori butonu
-        const favBtn = card.querySelector('.fav-btn');
-        if (favBtn) {
-            if (favorites.includes(gameId)) {
-                favBtn.classList.add('active');
-                favBtn.innerHTML = '<i class="fas fa-heart"></i>';
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        
+        let snake = [];
+        let food = {};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameSpeed = 10;
+        let gameRunning = false;
+        
+        // Yılanı başlat
+        function initSnake() {
+            snake = [
+                {x: 10, y: 10},
+                {x: 9, y: 10},
+                {x: 8, y: 10}
+            ];
+        }
+        
+        // Yemi yerleştir
+        function placeFood() {
+            food = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            
+            // Yemi yılanın üzerine yerleştirmemek için kontrol
+            for (let part of snake) {
+                if (part.x === food.x && part.y === food.y) {
+                    return placeFood();
+                }
             }
         }
-
-        // Puanlama güncelleme
-        const ratingStars = card.querySelectorAll('.rating i');
-        const currentRating = ratings[gameId] || 0;
         
-        if (ratingStars.length) {
-            ratingStars.forEach((star, index) => {
-                if (index < currentRating) {
-                    star.className = 'fas fa-star';
-                } else {
-                    star.className = 'far fa-star';
-                }
-            });
+        // Oyunu başlat
+        function startGame() {
+            initSnake();
+            placeFood();
+            dx = 1;
+            dy = 0;
+            score = 0;
+            gameRunning = true;
+            scoreElement.textContent = score;
+            gameOverElement.style.display = 'none';
+            
+            gameLoop();
         }
-
-        // Oyna butonu
-        const playBtn = card.querySelector('.play-btn');
-        if (playBtn) {
-            playBtn.addEventListener('click', () => openGame(gameId));
-        }
-    });
-}
-
-// ======================
-// Puanlamaları Güncelle
-// ======================
-function updateRatings() {
-    const ratings = getRatings();
-    gameCards.forEach(card => {
-        const gameId = card.dataset.game;
-        const ratingStars = card.querySelectorAll('.rating i');
-        const currentRating = ratings[gameId] || 0;
         
-        if (ratingStars.length) {
-            ratingStars.forEach((star, index) => {
-                if (index < currentRating) {
-                    star.className = 'fas fa-star';
-                } else {
-                    star.className = 'far fa-star';
-                }
-            });
+        // Oyun döngüsü
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            setTimeout(() => {
+                clearCanvas();
+                moveSnake();
+                drawSnake();
+                drawFood();
+                checkCollision();
+                gameLoop();
+            }, 1000 / gameSpeed);
         }
-    });
-}
-
-// ======================
-// Modal Aç/Kapat
-// ======================
-function openGame(gameId) {
-    if (!gameUrls[gameId]) return;
-    modalTitle.textContent = cardTitle(gameId);
-    gameDescription.textContent = cardDescription(gameId);
-    gameFrame.src = gameUrls[gameId];
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Sayfa kaydırmayı engelle
-}
-
-function closeGame() {
-    modal.style.display = 'none';
-    gameFrame.src = '';
-    document.body.style.overflow = 'auto'; // Sayfa kaydırmayı geri aç
-}
-
-closeModalBtn.addEventListener('click', closeGame);
-window.addEventListener('click', e => {
-    if (e.target === modal) closeGame();
-});
-
-// ESC tuşu ile modalı kapat
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeGame();
-});
-
-// ======================
-// Arama & Kategori
-// ======================
-function performSearch() {
-    const term = searchInput.value.toLowerCase().trim();
-    gameCards.forEach(card => {
-        const title = card.querySelector('.title').textContent.toLowerCase();
-        const desc = card.querySelector('.desc').textContent.toLowerCase();
-        const category = card.dataset.category;
         
-        if (title.includes(term) || desc.includes(term) || category.includes(term)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-searchInput.addEventListener('input', performSearch);
-searchBtn.addEventListener('click', performSearch);
-
-// Enter tuşu ile arama
-searchInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') performSearch();
-});
-
-categoryButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        categoryButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const category = btn.dataset.category;
-        
-        gameCards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
+        // Tuş olaylarını dinle
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (dx === 0) {
+                        dx = -1;
+                        dy = 0;
+                    }
+                    break;
+                case 'ArrowUp':
+                    if (dy === 0) {
+                        dx = 0;
+                        dy = -1;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (dx === 0) {
+                        dx = 1;
+                        dy = 0;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (dy === 0) {
+                        dx = 0;
+                        dy = 1;
+                    }
+                    break;
             }
         });
-    });
-});
-
-// ======================
-// Tema Değiştirme
-// ======================
-function setTheme(theme) {
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    } else {
-        document.body.classList.remove('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-    }
-    localStorage.setItem('theme', theme);
-}
-
-themeToggle.addEventListener('click', () => {
-    const dark = document.body.classList.contains('dark-mode');
-    setTheme(dark ? 'light' : 'dark');
-});
-
-// İlk yükleme
-document.addEventListener('DOMContentLoaded', () => {
-    setupGameCards();
-    updateRatings();
-
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-    
-    // Favorileri yükle
-    const favorites = getFavorites();
-    favorites.forEach(gameId => {
-        const favBtn = document.querySelector(`.fav-btn[data-game="${gameId}"]`);
-        if (favBtn) {
-            favBtn.classList.add('active');
-            favBtn.innerHTML = '<i class="fas fa-heart"></i>';
+        
+        // Dokunmatik kontroller için klavye olaylarını dinle
+        document.addEventListener('keydown', handleKeyEvent);
+        document.addEventListener('keyup', handleKeyEvent);
+        
+        function handleKeyEvent(e) {
+            // Ana sayfadaki kontrollerin çalışması için olayı durdurma
+            e.stopPropagation();
         }
-    });
-});
-
-// ======================
-// Yardımcı Fonksiyonlar
-// ======================
-function cardTitle(id) {
-    switch (id) {
-        case 'snake': return 'Yılan Oyunu';
-        case 'pong': return 'Pong Oyunu';
-        case 'tetris': return 'Mini Tetris';
-        case 'flappy': return 'Flappy Kare';
-        case 'memory': return 'Eş Kart Bul';
-        default: return 'Oyun';
-    }
-}
-
-function cardDescription(id) {
-    switch (id) {
-        case 'snake': return 'Yemleri topla, büyü ve rekoru kır.';
-        case 'pong': return 'W/S ile raketini hareket ettir ve savun.';
-        case 'tetris': return 'Düşen blokları yerleştir, satırları temizle.';
-        case 'flappy': return 'Zıpla ve engelleri aş; duvara çarpma.';
-        case 'memory': return 'Kartları çevir ve çiftlerini yakala.';
-        default: return 'Eğlenceli mini oyun.';
-    }
-}
+        
+        // Canvas'ı temizle
+        function clearCanvas() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Yılanı hareket ettir
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            snake.unshift(head);
+            
+            // Yem yendi mi?
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreElement.textContent = score;
+                placeFood();
+                
+                // Her 50 puanda hızlan
+                if (score % 50 === 0) {
+                    gameSpeed += 2;
+                }
+            } else {
+                snake.pop();
+            }
+        }
+        
+        // Yılanı çiz
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                ctx.fillStyle = index === 0 ? '#4CAF50' : '#8BC34A';
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+                
+                ctx.strokeStyle = '#000';
+                ctx.strokeRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+            });
+        }
+        
+        // Yemi çiz
+        function drawFood() {
+            ctx.fillStyle = '#FF5252';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+        
+        // Çarpışma kontrolü
+        function checkCollision() {
+            const head = snake[0];
+            
+            // Duvara çarpma
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                gameOver();
+                return;
+            }
+            
+            // Kendine çarpma
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+        
+        // Oyun bitti
+        function gameOver() {
+            gameRunning = false;
+            finalScoreElement.textContent = score;
+            gameOverElement.style.display = 'block';
+        }
+        
+        // Oyunu yeniden başlat
+        function restartGame() {
+            gameSpeed = 10;
+            startGame();
+        }
+        
+        // Sayfa yüklendiğinde oyunu başlat
+        window.onload = startGame;
+    </script>
+</body>
+</html>
