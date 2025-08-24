@@ -135,13 +135,54 @@ nav a:hover { background: #ffffff22; opacity: 1; }
 .play-btn:hover { background: var(--secondary-color); }
 
 /* Modal */
-.modal { display:none; position: fixed; inset:0; background: #000000bb; z-index: 100; align-items:center; justify-content:center; }
-.modal-content { width:min(96vw, 1000px); height:min(90vh, 720px); background: var(--card-bg); border-radius: 16px; overflow:hidden; display:flex; flex-direction:column; }
-.modal-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color:#fff; padding: 12px 16px; display:flex; justify-content:space-between; align-items:center; }
+.modal { 
+    display:none; 
+    position: fixed; 
+    inset:0; 
+    background: #000000bb; 
+    z-index: 100; 
+    align-items:center; 
+    justify-content:center; 
+    overflow: hidden; /* Sayfa kaymasını engeller */
+}
+.modal-content { 
+    width:min(96vw, 1000px); 
+    height:min(90vh, 720px); 
+    max-height: 90vh; /* Maksimum yükseklik */
+    background: var(--card-bg); 
+    border-radius: 16px; 
+    overflow: hidden; 
+    display:flex; 
+    flex-direction:column; 
+}
+.modal-header { 
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); 
+    color:#fff; 
+    padding: 12px 16px; 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+}
 .modal-header h2 { font-size: 18px; }
-.close-modal { width:36px; height:36px; border-radius:10px; border:none; background:#ffffff33; color:#fff; cursor:pointer; }
-.game-container { flex:1; }
-.game-iframe { width:100%; height:100%; border:none; }
+.close-modal { 
+    width:36px; 
+    height:36px; 
+    border-radius:10px; 
+    border:none; 
+    background:#ffffff33; 
+    color:#fff; 
+    cursor:pointer; 
+}
+.game-container { 
+    flex: 1; 
+    overflow: hidden; /* İframe kaymasını engeller */
+}
+.game-iframe { 
+    width:100%; 
+    height:100%; 
+    border:none; 
+    background: var(--card-bg);
+}
 
 footer { margin-top: 24px; background: #111827; color:#cbd5e1; }
 footer .footer-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; text-align:center; }
@@ -178,6 +219,18 @@ footer .footer-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; 
     .search-container input {
         width: 180px;
     }
+    
+    /* Mobil cihazlar için ek stiller */
+    .modal-content {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    .game-iframe {
+        height: calc(100vh - 100px);
+    }
 }
 
 /* Yıldız puanlama stilleri */
@@ -189,11 +242,6 @@ footer .footer-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; 
 
 .rate a:hover {
     color: #fbbf24;
-}
-
-/* Oyun iframe için yükseklik ayarı */
-.game-iframe {
-    background: var(--card-bg);
 }
 
 /* Dokunmatik kontroller */

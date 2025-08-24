@@ -110,25 +110,56 @@ function updateRatings() {
 }
 
 // ======================
-// Modal Aç/Kapat
+// Modal Aç/Kapat - OPTİMİZE EDİLMİŞ
 // ======================
 function openGame(cardEl) {
     const gameId = cardEl.dataset.game;
-    const url = cardEl.dataset.url;
+    let url = cardEl.dataset.url;
+    
+    // File protokolü için blob kullan
+    if (window.location.protocol === 'file:') {
+        // Doğrudan URL kullan, blob ile sorun çıkabilir
+        loadGameFrame(url, gameId);
+    } else {
+        loadGameFrame(url, gameId);
+    }
+}
+
+function loadGameFrame(url, gameId) {
     modalTitle.textContent = cardTitle(gameId);
     gameDescription.textContent = cardDescription(gameId);
     gameFrame.src = url;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 }
+
 function closeGame() {
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
     gameFrame.src = 'about:blank';
 }
+
 closeModalBtn.addEventListener('click', closeGame);
 window.addEventListener('click', e => { if (e.target === modal) closeGame(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
+
+// İframe'den gelen mesajları dinle
+window.addEventListener('message', function(e) {
+    if (e.data === 'closeGame') {
+        closeGame();
+    }
+});
+
+// İframe yüklendiğinde kontrol bilgisi gönder
+gameFrame.addEventListener('load', function() {
+    try {
+        gameFrame.contentWindow.postMessage('gameLoaded', '*');
+    } catch (e) {
+        console.log('Frame yükleme hatası:', e);
+    }
+});
 
 // ======================
 // Arama & Kategori
