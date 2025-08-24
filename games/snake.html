@@ -1,96 +1,71 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>Snake Oyunu</title>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    canvas {
-      background: #222;
-      display: block;
-    }
-  </style>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake</title>
+<style>
+  body{margin:0;background:#0b1020;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{display:grid;place-items:center;min-height:100vh;padding:16px}
+  canvas{background:#000;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.4)}
+  .hud{position:fixed;top:10px;left:10px;background:#0009;padding:8px 12px;border-radius:10px}
+  .touch{position:fixed;bottom:20px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px;pointer-events:none}
+  .touch .btn{pointer-events:auto;width:70px;height:70px;border-radius:50%;background:#fff8;border:2px solid #0005;display:flex;align-items:center;justify-content:center;font-size:24px;color:#111}
+</style>
 </head>
 <body>
-  <canvas id="game" width="400" height="400"></canvas>
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-
-    const grid = 20;
-    let count = 0;
-    let snake = [{x: 160, y: 160}];
-    let dx = grid;
-    let dy = 0;
-    let apple = {x: 320, y: 320};
-    let score = 0;
-
-    function getRandomPos() {
-      return Math.floor(Math.random() * 20) * grid;
-    }
-
-    function loop() {
-      requestAnimationFrame(loop);
-
-      if (++count < 6) return;
-      count = 0;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // snake hareket
-      const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-      snake.unshift(head);
-
-      // yeme
-      if (head.x === apple.x && head.y === apple.y) {
-        score++;
-        apple.x = getRandomPos();
-        apple.y = getRandomPos();
-      } else {
-        snake.pop();
-      }
-
-      // çarpma kontrol
-      if (
-        head.x < 0 || head.x >= canvas.width ||
-        head.y < 0 || head.y >= canvas.height ||
-        snake.slice(1).some(s => s.x === head.x && s.y === head.y)
-      ) {
-        alert("Oyun Bitti! Skor: " + score);
-        document.location.reload();
-      }
-
-      // elma çiz
-      ctx.fillStyle = "red";
-      ctx.fillRect(apple.x, apple.y, grid - 2, grid - 2);
-
-      // yılan çiz
-      ctx.fillStyle = "lime";
-      snake.forEach((s, i) => {
-        ctx.fillRect(s.x, s.y, grid - 2, grid - 2);
-      });
-
-      // skor
-      ctx.fillStyle = "white";
-      ctx.font = "16px Arial";
-      ctx.fillText("Skor: " + score, 10, 20);
-    }
-
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft" && dx === 0) { dx = -grid; dy = 0; }
-      if (e.key === "ArrowUp" && dy === 0) { dy = -grid; dx = 0; }
-      if (e.key === "ArrowRight" && dx === 0) { dx = grid; dy = 0; }
-      if (e.key === "ArrowDown" && dy === 0) { dy = grid; dx = 0; }
-    });
-
-    requestAnimationFrame(loop);
-  </script>
-</body>
-</html>
+<div class="wrap">
+  <canvas id="c" width="420" height="420"></canvas>
+</div>
+<div class="hud">Skor: <span id="score">0</span></div>
+<div class="touch" id="tch" style="display:none">
+  <div style="display:flex;gap:12px">
+    <div class="btn" data-k="ArrowLeft">←</div>
+    <div class="btn" data-k="ArrowRight">→</div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <div class="btn" data-k="ArrowUp">↑</div>
+    <div class="btn" data-k="ArrowDown">↓</div>
+  </div>
+</div>
+<script>
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d');
+const S=20, N=cvs.width/S;
+let snake=[], food={}, dx=1, dy=0, score=0, spd=10, run=false, loop;
+function init(){ snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; placeFood(); dx=1;dy=0;score=0; document.getElementById('score').textContent=0; run=true;
+  clearInterval(loop); loop=setInterval(tick, 1000/spd);
+}
+function rnd(){ return Math.floor(Math.random()*N); }
+function placeFood(){ food={x:rnd(), y:rnd()}; if(snake.some(p=>p.x==food.x&&p.y==food.y)) placeFood(); }
+function tick(){ if(!run) return; ctx.fillStyle='#000'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  move(); draw(); check();
+}
+function move(){ const head={x:snake[0].x+dx,y:snake[0].y+dy}; snake.unshift(head);
+  if(head.x===food.x && head.y===food.y){ score+=10; document.getElementById('score').textContent=score; placeFood(); if(score%50===0){ spd+=2; clearInterval(loop); loop=setInterval(tick, 1000/spd);} }
+  else snake.pop();
+}
+function draw(){
+  snake.forEach((p,i)=>{ ctx.fillStyle=i? '#7cfc00':'#32cd32'; ctx.fillRect(p.x*S,p.y*S,S,S); });
+  ctx.fillStyle='#f55'; ctx.fillRect(food.x*S,food.y*S,S,S);
+}
+function check(){ const h=snake[0];
+  if(h.x<0||h.y<0||h.x>=N||h.y>=N|| snake.slice(1).some(p=>p.x==h.x&&p.y==h.y)){ over(); }
+}
+function over(){ run=false; clearInterval(loop);
+  ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.fillStyle='#fff'; ctx.font='24px system-ui'; ctx.fillText('Oyun Bitti - Skor: '+score, 60, 200);
+  ctx.fillText('Yeniden başlamak için SPACE', 60, 230);
+}
+window.addEventListener('keydown',e=>{
+  if(!run && e.key===' ') return init();
+  if(e.key==='ArrowLeft' && dx!==1){dx=-1;dy=0}
+  else if(e.key==='ArrowRight'&& dx!==-1){dx=1;dy=0}
+  else if(e.key==='ArrowUp' && dy!==1){dx=0;dy=-1}
+  else if(e.key==='ArrowDown'&& dy!==-1){dx=0;dy=1}
+});
+function isTouch(){ return ('ontouchstart'in window)||navigator.maxTouchPoints>0; }
+if(isTouch()){ const panel=document.getElementById('tch'); panel.style.display='flex';
+  panel.querySelectorAll('.btn').forEach(b=>{
+    b.addEventListener('touchstart',e=>{ e.preventDefault(); const k=b.dataset.k; const ev=new KeyboardEvent('keydown',{key:k}); window.dispatchEvent(ev); });
+  });
+}
+init();
+</script>
+</body></html>

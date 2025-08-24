@@ -1,104 +1,61 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>Pong Oyunu</title>
-  <style>
-    body { margin:0; display:flex; justify-content:center; align-items:center; background:#111; color:white; }
-    canvas { background:#222; display:block; }
-  </style>
-</head>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pong</title>
+<style>
+  body{margin:0;background:#0b1020;color:#fff;font-family:system-ui}
+  .wrap{display:grid;place-items:center;min-height:100vh;padding:16px}
+  canvas{background:#000;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.4)}
+  .hud{position:fixed;top:10px;left:10px;background:#0009;padding:8px 12px;border-radius:10px}
+  .touch{position:fixed;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px}
+  .touch button{padding:14px 18px;border-radius:999px;border:none;background:#fff;color:#111;font-weight:700}
+</style></head>
 <body>
-  <canvas id="game" width="600" height="400"></canvas>
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-
-    let paddleHeight = 80, paddleWidth = 10;
-    let playerY = canvas.height/2 - paddleHeight/2;
-    let aiY = canvas.height/2 - paddleHeight/2;
-    let ballX = canvas.width/2, ballY = canvas.height/2;
-    let ballSize = 10;
-    let ballSpeedX = 4, ballSpeedY = 4;
-    let playerScore = 0, aiScore = 0;
-
-    function drawRect(x,y,w,h,color){
-      ctx.fillStyle=color;
-      ctx.fillRect(x,y,w,h);
-    }
-
-    function drawCircle(x,y,r,color){
-      ctx.fillStyle=color;
-      ctx.beginPath();
-      ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function drawText(text,x,y,color){
-      ctx.fillStyle=color;
-      ctx.font="20px Arial";
-      ctx.fillText(text,x,y);
-    }
-
-    function resetBall(){
-      ballX = canvas.width/2;
-      ballY = canvas.height/2;
-      ballSpeedX = -ballSpeedX;
-    }
-
-    function game(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-
-      // top hareket
-      ballX += ballSpeedX;
-      ballY += ballSpeedY;
-
-      // üst-alt çarpma
-      if(ballY+ballSize>canvas.height || ballY-ballSize<0) ballSpeedY=-ballSpeedY;
-
-      // player hareket
-      drawRect(0,playerY,paddleWidth,paddleHeight,"lime");
-      drawRect(canvas.width-paddleWidth,aiY,paddleWidth,paddleHeight,"red");
-      drawCircle(ballX,ballY,ballSize,"white");
-
-      // çarpışma kontrol
-      if(ballX-ballSize<0){
-        if(ballY>playerY && ballY<playerY+paddleHeight){
-          ballSpeedX=-ballSpeedX;
-        } else {
-          aiScore++;
-          resetBall();
-        }
-      }
-      if(ballX+ballSize>canvas.width){
-        if(ballY>aiY && ballY<aiY+paddleHeight){
-          ballSpeedX=-ballSpeedX;
-        } else {
-          playerScore++;
-          resetBall();
-        }
-      }
-
-      // AI hareket
-      aiY += ((ballY - (aiY+paddleHeight/2)))*0.05;
-
-      // skor
-      drawText(playerScore,canvas.width/4,30,"lime");
-      drawText(aiScore,3*canvas.width/4,30,"red");
-    }
-
-    function update(){
-      game();
-      requestAnimationFrame(update);
-    }
-
-    document.addEventListener("keydown",e=>{
-      if(e.key==="ArrowUp") playerY -= 20;
-      if(e.key==="ArrowDown") playerY += 20;
-    });
-
-    update();
-  </script>
-</body>
-</html>
+<div class="wrap"><canvas id="c" width="500" height="320"></canvas></div>
+<div class="hud">Skor: <span id="ps">0</span> - <span id="cs">0</span> (Sen - CPU)</div>
+<div class="touch">
+  <button id="up">↑</button><button id="down">↓</button>
+</div>
+<script>
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d');
+const PADDLE_H=60,PADDLE_W=10; let playerY=130, cpuY=130, ball={x:250,y:160,vx:3,vy:2,r:6}, ps=0, cs=0, keys={};
+function resetBall(){ ball={x:cvs.width/2,y:cvs.height/2,vx:(Math.random()>.5?3:-3),vy:(Math.random()>.5?2:-2),r:6}; }
+function tick(){
+  // hareket
+  if(keys['KeyW']) playerY-=4;
+  if(keys['KeyS']) playerY+=4;
+  playerY=Math.max(0,Math.min(cvs.height-PADDLE_H,playerY));
+  // basit cpu takip
+  const target = ball.y - PADDLE_H/2; cpuY += (target - cpuY)*0.07;
+  // top
+  ball.x+=ball.vx; ball.y+=ball.vy;
+  if(ball.y-ball.r<0 || ball.y+ball.r>cvs.height) ball.vy*=-1;
+  // player çarpışma
+  if(ball.x-ball.r < 20+PADDLE_W && ball.y>playerY && ball.y<playerY+PADDLE_H && ball.vx<0){
+    ball.vx*=-1.05; ball.vy += (ball.y-(playerY+PADDLE_H/2))*0.02;
+  }
+  // cpu çarpışma
+  if(ball.x+ball.r > cvs.width-20-PADDLE_W && ball.y>cpuY && ball.y<cpuY+PADDLE_H && ball.vx>0){
+    ball.vx*=-1.05; ball.vy += (ball.y-(cpuY+PADDLE_H/2))*0.02;
+  }
+  // skor
+  if(ball.x<0){ cs++; document.getElementById('cs').textContent=cs; resetBall(); }
+  if(ball.x>cvs.width){ ps++; document.getElementById('ps').textContent=ps; resetBall(); }
+  draw();
+  requestAnimationFrame(tick);
+}
+function draw(){
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.fillStyle='#fff';
+  // orta çizgi
+  for(let y=0;y<cvs.height;y+=20){ ctx.fillRect(cvs.width/2-1,y,2,10); }
+  ctx.fillRect(20,playerY,PADDLE_W,PADDLE_H);
+  ctx.fillRect(cvs.width-20-PADDLE_W,cpuY,PADDLE_W,PADDLE_H);
+  ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+}
+window.addEventListener('keydown',e=>{ keys[e.code]=true; });
+window.addEventListener('keyup',e=>{ keys[e.code]=false; });
+document.getElementById('up').addEventListener('click',()=>{ keys['KeyW']=true; setTimeout(()=>keys['KeyW']=false,80); });
+document.getElementById('down').addEventListener('click',()=>{ keys['KeyS']=true; setTimeout(()=>keys['KeyS']=false,80); });
+resetBall(); tick();
+</script>
+</body></html>

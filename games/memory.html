@@ -1,57 +1,46 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>Hafıza Kartı Oyunu</title>
-  <style>
-    body { background:#111; color:white; display:flex; flex-direction:column; align-items:center; font-family:Arial; }
-    .grid { display:grid; grid-template-columns:repeat(4,80px); gap:10px; margin-top:20px; }
-    .card { width:80px; height:80px; background:#333; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; }
-    .matched { background:#2ecc71 !important; }
-  </style>
-</head>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory</title>
+<style>
+  body{margin:0;background:#0b1020;color:#fff;font-family:system-ui}
+  .wrap{display:grid;place-items:center;min-height:100vh;padding:16px}
+  .grid{display:grid;grid-template-columns:repeat(4,80px);gap:12px}
+  .card{width:80px;height:80px;border-radius:10px;background:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;user-select:none;transition:transform .15s}
+  .card.open,.card.matched{background:#10b981;transform:scale(0.98)}
+  .hud{position:fixed;top:10px;left:10px;background:#0009;padding:8px 12px;border-radius:10px}
+  button.restart{margin-top:12px;padding:10px 14px;border:none;border-radius:10px;background:#fff;color:#111;font-weight:700}
+</style></head>
 <body>
-  <h2>Hafıza Oyunu</h2>
-  <div class="grid" id="grid"></div>
-  <script>
-    const emojis=["🍎","🍌","🍇","🍉","🍒","🍋","🍎","🍌","🍇","🍉","🍒","🍋"];
-    let grid=document.getElementById("grid");
-    let cards=[],first=null,lock=false;
-
-    function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
-
-    function createBoard(){
-      shuffle(emojis).forEach(e=>{
-        let card=document.createElement("div");
-        card.className="card";
-        card.dataset.value=e;
-        card.addEventListener("click",flipCard);
-        grid.appendChild(card);
-      });
-    }
-
-    function flipCard(){
-      if(lock || this.classList.contains("matched") || this===first) return;
-      this.textContent=this.dataset.value;
-      if(!first){ first=this; }
-      else{
-        if(this.dataset.value===first.dataset.value){
-          this.classList.add("matched");
-          first.classList.add("matched");
-          first=null;
-        } else {
-          lock=true;
-          setTimeout(()=>{
-            this.textContent="";
-            first.textContent="";
-            first=null;
-            lock=false;
-          },800);
-        }
+<div class="wrap">
+  <div>
+    <div class="grid" id="grid"></div>
+    <div style="text-align:center"><button class="restart" id="rs">Yeniden Başlat</button></div>
+  </div>
+</div>
+<div class="hud">Hamle: <span id="mv">0</span> | Eşleşme: <span id="mt">0</span>/8</div>
+<script>
+const icons=['🍎','🍌','🍇','🍓','🍑','🍍','🍒','🥝'];
+let board=[...icons,...icons];
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ let j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let opened=[], moves=0, matched=0, lock=false;
+const grid=document.getElementById('grid'); const mv=document.getElementById('mv'); const mt=document.getElementById('mt');
+function setup(){
+  grid.innerHTML=''; board=shuffle([...icons,...icons]); opened=[]; moves=0; matched=0; lock=false; mv.textContent=0; mt.textContent=0;
+  board.forEach((val,idx)=>{
+    const d=document.createElement('div'); d.className='card'; d.dataset.val=val; d.textContent='?';
+    d.addEventListener('click',()=>{
+      if(lock || d.classList.contains('matched') || d.classList.contains('open')) return;
+      d.classList.add('open'); d.textContent=val; opened.push(d);
+      if(opened.length===2){
+        moves++; mv.textContent=moves; lock=true;
+        if(opened[0].dataset.val===opened[1].dataset.val){ opened.forEach(c=>c.classList.add('matched')); matched++; mt.textContent=matched; opened=[]; lock=false; if(matched===8) setTimeout(()=>alert('Tebrikler! Hamle: '+moves),10); }
+        else{ setTimeout(()=>{ opened.forEach(c=>{ c.classList.remove('open'); c.textContent='?'; }); opened=[]; lock=false; }, 600); }
       }
-    }
-
-    createBoard();
-  </script>
-</body>
-</html>
+    });
+    grid.appendChild(d);
+  });
+}
+document.getElementById('rs').addEventListener('click',setup);
+setup();
+</script>
+</body></html>
